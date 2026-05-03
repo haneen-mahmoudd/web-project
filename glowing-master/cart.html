@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cart - Glowing</title>
+  <link rel="shortcut icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./assets/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    .cart-page { padding: 60px 0; min-height: 60vh; }
+    .cart-title { font-size: 28px; font-weight: 700; margin-bottom: 30px; }
+    .cart-table { width: 100%; border-collapse: collapse; }
+    .cart-table th, .cart-table td { padding: 16px; text-align: left; border-bottom: 1px solid #eee; }
+    .cart-table img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; }
+    .qty-btn { background: #eee; border: none; padding: 4px 10px; cursor: pointer; font-size: 16px; border-radius: 4px; }
+    .qty-value { margin: 0 10px; font-weight: 600; }
+    .remove-btn { background: none; border: none; color: red; cursor: pointer; font-size: 20px; }
+    .cart-summary { margin-top: 30px; text-align: right; }
+    .cart-total { font-size: 22px; font-weight: 700; margin-bottom: 16px; }
+    .empty-cart { text-align: center; padding: 60px; color: #999; font-size: 18px; }
+    .checkout-btn { display: inline-block; background: #333; color: #fff; padding: 14px 30px; border-radius: 8px; text-decoration: none; font-weight: 600; }
+    .checkout-btn:hover { background: #555; }
+    .continue-btn { display: inline-block; margin-right: 16px; color: #333; text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <div class="header-top" data-header>
+      <div class="container">
+        <a href="./index.html" class="logo">
+          <img src="./assets/images/logo.png" width="179" height="26" alt="Glowing">
+        </a>
+        <div class="header-actions">
+          <a href="./cart.html" class="header-action-btn" aria-label="cart item">
+            <data class="btn-text" value="0">$0.00</data>
+            <ion-icon name="bag-handle-outline" aria-hidden="true"></ion-icon>
+            <span class="btn-badge">0</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="cart-page">
+      <div class="container">
+        <h1 class="cart-title">Your Cart</h1>
+        <div id="cart-content"></div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+    function updateCartBadge() {
+      const badge = document.querySelector('[aria-label="cart item"] .btn-badge');
+      const total = document.querySelector('[aria-label="cart item"] .btn-text');
+      if (badge) badge.textContent = cart.reduce((sum, item) => sum + item.quantity, 0);
+      if (total) {
+        const totalPrice = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+        total.textContent = `$${totalPrice.toFixed(2)}`;
+      }
+    }
+
+    function saveCart() {
+      localStorage.setItem('cart', JSON.stringify(cart));
+      updateCartBadge();
+      renderCart();
+    }
+
+    function changeQty(productId, delta) {
+      const item = cart.find(i => i.productId === productId);
+      if (item) {
+        item.quantity += delta;
+        if (item.quantity <= 0) {
+          const index = cart.indexOf(item);
+          cart.splice(index, 1);
+        }
+      }
+      saveCart();
+    }
+
+    function removeItem(productId) {
+      const index = cart.findIndex(i => i.productId === productId);
+      if (index > -1) cart.splice(index, 1);
+      saveCart();
+    }
+
+    function renderCart() {
+      const container = document.getElementById('cart-content');
+      if (cart.length === 0) {
+        container.innerHTML = `
+          <div class="empty-cart">
+            <p>Your cart is empty</p>
+            <br>
+            <a href="./index.html" class="checkout-btn">Continue Shopping</a>
+          </div>`;
+        return;
+      }
+
+      const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+      container.innerHTML = `
+        <table class="cart-table">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Name</th>
+              <th>Price</th>
+              <th>Quantity</th>
+              <th>Total</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            ${cart.map(item => `
+              <tr>
+                <td><img src="${item.image}" alt="${item.name}"></td>
+                <td>${item.name}</td>
+                <td>$${item.price.toFixed(2)}</td>
+                <td>
+                  <button class="qty-btn" onclick="changeQty(${item.productId}, -1)">-</button>
+                  <span class="qty-value">${item.quantity}</span>
+                  <button class="qty-btn" onclick="changeQty(${item.productId}, 1)">+</button>
+                </td>
+                <td>$${(item.price * item.quantity).toFixed(2)}</td>
+                <td><button class="remove-btn" onclick="removeItem(${item.productId})">✕</button></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+        <div class="cart-summary">
+          <p class="cart-total">Total: $${total.toFixed(2)}</p>
+          <a href="./index.html" class="continue-btn">Continue Shopping</a>
+          <a href="./checkout.html" class="checkout-btn">Proceed to Checkout</a>
+        </div>
+      `;
+    }
+
+    updateCartBadge();
+    renderCart();
+  </script>
+
+  <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+</body>
+</html>

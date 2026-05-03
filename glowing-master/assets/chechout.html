@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout - Glowing</title>
+  <link rel="shortcut icon" href="./favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./assets/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    .checkout-page { padding: 60px 0; min-height: 60vh; }
+    .checkout-title { font-size: 28px; font-weight: 700; margin-bottom: 30px; }
+    .checkout-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+    @media (max-width: 768px) { .checkout-grid { grid-template-columns: 1fr; } }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: #555; }
+    .form-group input { width: 100%; padding: 12px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 14px; font-family: inherit; outline: none; }
+    .form-group input:focus { border-color: #333; }
+    .order-summary { background: #f9f9f9; padding: 24px; border-radius: 12px; }
+    .order-summary h3 { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
+    .order-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; font-size: 14px; }
+    .order-total { display: flex; justify-content: space-between; font-weight: 700; font-size: 18px; margin-top: 16px; }
+    .submit-btn { width: 100%; background: #333; color: #fff; border: none; padding: 16px; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 20px; font-family: inherit; }
+    .submit-btn:hover { background: #555; }
+    .success-msg { text-align: center; padding: 60px; }
+    .success-msg h2 { font-size: 28px; font-weight: 700; margin-bottom: 16px; color: #2e7d32; }
+    .success-msg a { display: inline-block; background: #333; color: #fff; padding: 14px 30px; border-radius: 8px; text-decoration: none; font-weight: 600; margin-top: 20px; }
+    .error-msg { color: red; font-size: 12px; margin-top: 4px; display: none; }
+    .error-msg.show { display: block; }
+    .login-warning { background: #fff3cd; border: 1px solid #ffc107; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 14px; }
+    .login-warning a { color: #333; font-weight: 700; }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <div class="header-top" data-header>
+      <div class="container">
+        <a href="./index.html" class="logo">
+          <img src="./assets/images/logo.png" width="179" height="26" alt="Glowing">
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="checkout-page">
+      <div class="container">
+        <h1 class="checkout-title">Checkout</h1>
+        <div id="checkout-content"></div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const API_URL = 'http://localhost:3000/api';
+    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+    const token = localStorage.getItem('token');
+
+    function renderCheckout() {
+      const container = document.getElementById('checkout-content');
+
+      if (cart.length === 0) {
+        container.innerHTML = `
+          <div class="success-msg">
+            <p style="font-size:18px; color:#999;">Your cart is empty</p>
+            <a href="./index.html">Continue Shopping</a>
+          </div>`;
+        return;
+      }
+
+      const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+      container.innerHTML = `
+        ${!token ? `
+          <div class="login-warning">
+            You need to <a href="./login.html">login</a> to place an order.
+          </div>` : ''}
+
+        <div class="checkout-grid">
+          <div class="checkout-form">
+            <div class="form-group">
+              <label>Full Name</label>
+              <input type="text" id="name" placeholder="Ahmed Mohamed">
+              <div class="error-msg" id="name-err">Please enter your name</div>
+            </div>
+            <div class="form-group">
+              <label>Phone Number</label>
+              <input type="tel" id="phone" placeholder="01000000000">
+              <div class="error-msg" id="phone-err">Please enter your phone number</div>
+            </div>
+            <div class="form-group">
+              <label>Address</label>
+              <input type="text" id="address" placeholder="Cairo, Egypt">
+              <div class="error-msg" id="address-err">Please enter your address</div>
+            </div>
+            <button class="submit-btn" onclick="placeOrder()">Confirm Order</button>
+          </div>
+
+          <div class="order-summary">
+            <h3>Order Summary</h3>
+            ${cart.map(item => `
+              <div class="order-item">
+                <span>${item.name} x${item.quantity}</span>
+                <span>$${(item.price * item.quantity).toFixed(2)}</span>
+              </div>
+            `).join('')}
+            <div class="order-total">
+              <span>Total</span>
+              <span>$${total.toFixed(2)}</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    async function placeOrder() {
+      if (!token) {
+        alert('Please login first to place an order');
+        window.location.href = './login.html';
+        return;
+      }
+
+      const name = document.getElementById('name').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const address = document.getElementById('address').value.trim();
+      let valid = true;
+
+      if (!name) { document.getElementById('name-err').classList.add('show'); valid = false; }
+      else { document.getElementById('name-err').classList.remove('show'); }
+
+      if (!phone) { document.getElementById('phone-err').classList.add('show'); valid = false; }
+      else { document.getElementById('phone-err').classList.remove('show'); }
+
+      if (!address) { document.getElementById('address-err').classList.add('show'); valid = false; }
+      else { document.getElementById('address-err').classList.remove('show'); }
+
+      if (!valid) return;
+
+      const orderData = {
+        items: cart.map(item => ({ productId: item.productId, quantity: item.quantity })),
+        address,
+        phone,
+        paymentMethod: 'cash_on_delivery'
+      };
+
+      try {
+        const res = await fetch(`${API_URL}/orders`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(orderData)
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          localStorage.removeItem('cart');
+          document.getElementById('checkout-content').innerHTML = `
+            <div class="success-msg">
+              <h2>Order Placed Successfully!</h2>
+              <p>Thank you for your order. We will contact you soon.</p>
+              <p>Order ID: #${data.id}</p>
+              <a href="./index.html">Continue Shopping</a>
+            </div>`;
+        } else {
+          alert(data.message || 'Order failed. Please try again.');
+        }
+      } catch (err) {
+        alert('Connection error. Make sure the server is running.');
+      }
+    }
+
+    renderCheckout();
+  </script>
+
+  <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+</body>
+</html>
