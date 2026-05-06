@@ -1,0 +1,2 @@
+2026-05-06 16:59:16 | GLW-429BE2 | 107988049 | Awish El Hajar, Mansoura | cash_on_delivery | [{"productId":1,"quantity":1},{"productId":"Coffee Bean Caffeine Eye Cream39.0029","quantity":2},{"productId":"Facial cleanser29","quantity":1}]
+2026-05-06 17:00:59 | GLW-B1FD28 | 107988049 | Awish El Hajar, Mansoura | cash_on_delivery | [{"productId":"Coffee Bean Caffeine Eye Cream39.0029","quantity":1},{"productId":"Facial cleanser29","quantity":1},{"productId":"Coffee Bean Caffeine Eye Cream29","quantity":1}]
