@@ -14,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-$email    = clean($_POST['email'] ?? '');
+$email    = clean($_POST['email_address'] ?? '');
 $redirect = 'index.html';
 
 if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
