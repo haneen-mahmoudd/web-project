@@ -115,12 +115,6 @@
     }
 
     async function placeOrder() {
-      if (!token) {
-        alert('Please login first to place an order');
-        window.location.href = './login.html';
-        return;
-      }
-
       const name = document.getElementById('name').value.trim();
       const phone = document.getElementById('phone').value.trim();
       const address = document.getElementById('address').value.trim();
@@ -145,12 +139,11 @@
       };
 
       try {
-        const res = await fetch(`${API_URL}/orders`, {
+       const res = await fetch('./process_order.php', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
+            'Content-Type': 'application/json'
+           },
           body: JSON.stringify(orderData)
         });
 

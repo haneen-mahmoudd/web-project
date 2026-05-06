@@ -1,0 +1,17 @@
+# 1. منع المتصفح من عرض قائمة الملفات (للحماية)
+Options -Indexes
+
+# 2. تفعيل محرك إعادة كتابة الروابط
+RewriteEngine On
+
+# 3. حماية ملفات البيانات النصية (عشان مفيش قاعدة بيانات)
+# الكود ده هيمنع أي حد يفتح ملفات الـ txt من المتصفح
+<Files "*.txt">
+    Order Deny,Allow
+    Deny from all
+</Files>
+
+# 4. إخفاء امتداد .php من الروابط (اختياري لكنه احترافي)
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}.php -f
+RewriteRule ^([^\.]+)$ $1.php [NC,L]
